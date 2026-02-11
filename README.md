@@ -2,10 +2,14 @@
 ai bot captcha attack detection
 
 MINI PROJECT/
+
 │── captcha_guard.pkl   <-- Your trained AI (MUST be here)
+
 │── app.py              <-- The Python Web Server (Create this)
+
 │
 └── templates/
+
     └── index.html      <-- The Website Frontend (Create this)
 
     
