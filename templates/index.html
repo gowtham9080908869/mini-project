@@ -1,36 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Cyber-Security Interface</title>
+    <title>AI Security Verification</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             background-color: #050505;
             color: #00f2ff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
         }
 
-        /* Futuristic Circular Container */
+
+
+        /* Main Container */
         .tech-circle {
             position: relative;
-            width: 400px;
-            height: 400px;
+            width: 550px;
+            max-width: 90vw;
+            min-height: 500px;
             border: 2px solid rgba(0, 242, 255, 0.2);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             box-shadow: 0 0 50px rgba(0, 242, 255, 0.1);
+            padding: 40px;
         }
 
-        /* Rotating Outer Rings */
         .tech-circle::before {
             content: '';
             position: absolute;
@@ -43,109 +54,627 @@
         }
 
         @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .main-panel {
             text-align: center;
             z-index: 10;
+            width: 100%;
         }
 
         h1 {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             letter-spacing: 4px;
             text-transform: uppercase;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-shadow: 0 0 10px #00f2ff;
         }
 
-        /* The Button Styled like the Image */
-        #checkBtn {
+        .stage-info {
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .attempts-display {
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            display: inline-block;
+            border-radius: 20px;
+        }
+
+        /* Text CAPTCHA */
+        .captcha-image {
+            border: 2px solid rgba(0, 242, 255, 0.3);
+            border-radius: 8px;
+            margin: 20px auto;
+            max-width: 100%;
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+            display: block;
+        }
+
+        /* Image Grid CAPTCHA */
+        .image-challenge-text {
+            font-size: 1rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            padding: 10px;
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid rgba(0, 242, 255, 0.3);
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 20px auto;
+            max-width: 400px;
+        }
+
+        .grid-item {
+            position: relative;
+            cursor: pointer;
+            border: 3px solid rgba(0, 242, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .grid-item:hover {
+            border-color: rgba(0, 242, 255, 0.6);
+            transform: scale(1.05);
+        }
+
+        .grid-item.selected {
+            border-color: #00f2ff;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.8);
+        }
+
+        .grid-item.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #00f2ff;
+            color: #050505;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Part Selection CAPTCHA */
+        .image-container {
+            position: relative;
+            margin: 20px auto;
+            max-width: 400px;
+            /* or whatever size fits */
+            border: 2px solid rgba(0, 242, 255, 0.3);
+            cursor: crosshair;
+        }
+
+        .image-container img {
+            width: 100%;
+            display: block;
+        }
+
+        .click-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00f2ff;
+            background: rgba(0, 242, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            box-shadow: 0 0 10px #00f2ff;
+        }
+
+        /* Audio Player */
+        .audio-btn {
+            background: rgba(0, 242, 255, 0.1);
+            border: 2px solid #00f2ff;
+            color: #00f2ff;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .audio-btn:hover {
+            background: rgba(0, 242, 255, 0.2);
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.5);
+        }
+
+        /* Input Fields */
+        .captcha-input {
+            background: rgba(0, 242, 255, 0.05);
+            border: 2px solid rgba(0, 242, 255, 0.3);
+            color: #00f2ff;
+            padding: 12px 20px;
+            font-size: 1rem;
+            text-align: center;
+            width: 100%;
+            max-width: 300px;
+            margin: 15px auto;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            outline: none;
+            transition: all 0.3s;
+            display: block;
+        }
+
+        .captcha-input:focus {
+            border-color: #00f2ff;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+        }
+
+        .captcha-input::placeholder {
+            color: rgba(0, 242, 255, 0.4);
+            text-transform: none;
+            letter-spacing: 1px;
+        }
+
+        /* Buttons */
+        .verify-btn {
             background: transparent;
             border: 2px solid #00f2ff;
             color: #00f2ff;
-            padding: 15px 30px;
+            padding: 12px 35px;
             font-size: 1rem;
             font-weight: bold;
             text-transform: uppercase;
             cursor: pointer;
             transition: 0.3s;
             box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+            margin-top: 15px;
         }
 
-        #checkBtn:hover {
+        .verify-btn:hover {
             background: rgba(0, 242, 255, 0.1);
             box-shadow: 0 0 30px rgba(0, 242, 255, 0.6);
         }
 
-        #msg {
-            margin-top: 30px;
-            font-size: 0.9rem;
+        .verify-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Message Display */
+        .message {
+            margin-top: 25px;
+            font-size: 0.95rem;
             letter-spacing: 1px;
+            min-height: 30px;
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        /* Access Denied Screen */
+        .access-denied {
+            text-align: center;
+        }
+
+        .denied-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .denied-message {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #ff0055;
+            text-shadow: 0 0 10px #ff0055;
+        }
+
+        .denied-text {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            opacity: 0.8;
+        }
+
+        /* Access Granted Screen */
+        .access-granted {
+            text-align: center;
+        }
+
+        .granted-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            color: #00ff88;
+            animation: checkmark 0.5s ease;
+        }
+
+        @keyframes checkmark {
+            0% {
+                transform: scale(0);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .granted-message {
+            font-size: 1.5rem;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
             height: 20px;
+            border: 3px solid rgba(0, 242, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #00f2ff;
+            animation: spin 1s linear infinite;
         }
 
-        .scanning-line {
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: #00f2ff;
-            top: 50%;
-            left: 0;
-            box-shadow: 0 0 15px #00f2ff;
-            animation: scan 3s ease-in-out infinite;
-            display: none;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
 
-        @keyframes scan {
-            0%, 100% { top: 20%; }
-            50% { top: 80%; }
+        .hidden {
+            display: none !important;
         }
     </style>
 </head>
+
 <body>
 
+
+
+    <!-- Main Interface -->
     <div class="tech-circle">
-        <div class="scanning-line" id="scanner"></div>
         <div class="main-panel">
-            <h1>I'M NOT A ROBOT</h1>
-            <button id="checkBtn">Initiate Verification</button>
-            <div id="msg">Awaiting Neural Input...</div>
+
+            <!-- Challenge Area -->
+            <div id="challenge-area">
+                <h1 id="stage-title">VERIFICATION STAGE</h1>
+                <div class="stage-info" id="stage-info">Loading...</div>
+                <div class="attempts-display" id="attempts">Attempts: -</div>
+
+                <!-- Text CAPTCHA -->
+                <div id="text-captcha" class="hidden">
+                    <img id="text-img" class="captcha-image" alt="Loading...">
+                    <input type="text" id="text-input" class="captcha-input" placeholder="Enter the characters">
+                </div>
+
+                <!-- Image CAPTCHA -->
+                <div id="image-captcha" class="hidden">
+                    <div class="image-challenge-text" id="image-challenge">Select all images with...</div>
+                    <div class="image-grid" id="image-grid"></div>
+                    <div class="image-grid" id="image-grid"></div>
+                </div>
+
+                <!-- Part Selection CAPTCHA -->
+                <div id="part-captcha" class="hidden">
+                    <div class="image-challenge-text" id="part-instruction">Click on the object...</div>
+                    <div class="image-container" id="part-container">
+                        <img id="part-img" src="" alt="Challenge Image">
+                    </div>
+                </div>
+
+                <!-- Voice CAPTCHA -->
+                <div id="voice-captcha" class="hidden">
+                    <button class="audio-btn" id="play-audio">▶ Play Audio</button>
+                    <audio id="audio-player" style="display:none;"></audio>
+                    <input type="text" id="voice-input" class="captcha-input" placeholder="Enter what you hear">
+                </div>
+
+                <button class="verify-btn" id="verify-btn">Verify</button>
+                <div class="message" id="message"></div>
+            </div>
+
+            <!-- Access Denied Screen -->
+            <div id="denied-screen" class="access-denied hidden">
+                <div class="denied-icon">🚫</div>
+                <div class="denied-message">ACCESS DENIED</div>
+                <div class="denied-text">
+                    All verification attempts have been exhausted.<br>
+                    Please try again later.
+                </div>
+            </div>
+
+            <!-- Access Granted Screen -->
+            <div id="granted-screen" class="access-granted hidden">
+                <div class="granted-icon">✅</div>
+                <div class="granted-message">ACCESS GRANTED</div>
+                <div class="denied-text" style="color: #00ff88;">
+                    Verification successful!
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        let mouseCoords = [];
-        let start = Date.now();
+        let currentStage = 'text';
+        let selectedImages = [];
+        let partSelection = null;
 
-        document.onmousemove = (e) => {
-            mouseCoords.push({x: e.pageX, y: e.pageY, time: (Date.now() - start)/1000});
+        // Initialize on page load
+        window.onload = () => {
+            loadChallenge();
         };
 
-        document.getElementById('checkBtn').onclick = () => {
-            const msg = document.getElementById('msg');
-            const scanner = document.getElementById('scanner');
-            
-            msg.innerText = "ANALYZING BIOMETRIC PATTERNS...";
-            msg.style.color = "#00f2ff";
-            scanner.style.display = "block";
+        // Load current challenge
+        function loadChallenge() {
+            showMessage('Loading challenge...', '#00f2ff');
 
-            fetch('/verify', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({coords: mouseCoords})
-            })
-            .then(res => res.json())
-            .then(data => {
-                scanner.style.display = "none";
-                msg.innerText = data.status;
-                msg.style.color = data.color === 'green' ? '#00ff88' : '#ff0055';
-                msg.style.textShadow = `0 0 10px ${msg.style.color}`;
-                mouseCoords = []; 
+            fetch('/get_current_challenge')
+                .then(res => res.json())
+                .then(data => {
+                    currentStage = data.stage;
+
+                    if (data.stage === 'denied') {
+                        showDeniedScreen();
+                        return;
+                    }
+
+
+                    updateStageInfo(data);
+                    displayChallenge(data);
+                    showMessage('', '');
+                })
+                .catch(err => {
+                    showMessage('Error loading challenge', '#ff0055');
+                });
+        }
+
+
+
+        // Update stage information
+        function updateStageInfo(data) {
+            const titles = {
+                'text': 'TEXT VERIFICATION',
+                'image': 'IMAGE SELECTION',
+                'part': 'OBJECT IDENTIFICATION',
+                'voice': 'AUDIO VERIFICATION'
+            };
+
+            document.getElementById('stage-title').innerText = titles[data.stage] || 'VERIFICATION';
+            document.getElementById('stage-info').innerText = `Stage ${data.stage_number} of 3`;
+            document.getElementById('attempts').innerText = `Attempts Remaining: ${data.attempts_left}`;
+        }
+
+        // Display appropriate challenge
+        function displayChallenge(data) {
+            // Hide all challenges
+            document.getElementById('text-captcha').classList.add('hidden');
+            document.getElementById('image-captcha').classList.add('hidden');
+            document.getElementById('part-captcha').classList.add('hidden');
+            document.getElementById('voice-captcha').classList.add('hidden');
+
+            if (data.stage === 'text') {
+                document.getElementById('text-captcha').classList.remove('hidden');
+                document.getElementById('text-img').src = data.image;
+                document.getElementById('text-input').value = '';
+                document.getElementById('text-input').focus();
+            }
+            else if (data.stage === 'image') {
+                document.getElementById('image-captcha').classList.remove('hidden');
+                document.getElementById('image-challenge').innerText = `Select all images with: ${data.challenge}`;
+                displayImageGrid(data.images);
+            }
+            else if (data.stage === 'part') {
+                document.getElementById('part-captcha').classList.remove('hidden');
+                document.getElementById('part-instruction').innerText = data.instruction;
+                document.getElementById('part-img').src = data.image;
+
+                // Clear previous marker
+                const markers = document.getElementsByClassName('click-marker');
+                while (markers[0]) {
+                    markers[0].parentNode.removeChild(markers[0]);
+                }
+                partSelection = null;
+            }
+            else if (data.stage === 'voice') {
+                document.getElementById('voice-captcha').classList.remove('hidden');
+                document.getElementById('audio-player').src = data.audio;
+                document.getElementById('voice-input').value = '';
+            }
+        }
+
+        // Display image grid
+        function displayImageGrid(images) {
+            const grid = document.getElementById('image-grid');
+            grid.innerHTML = '';
+            selectedImages = [];
+
+            images.forEach((imgSrc, index) => {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+                item.dataset.index = index;
+
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.alt = `Image ${index + 1}`;
+
+                item.appendChild(img);
+                item.onclick = () => toggleImageSelection(item, index);
+                grid.appendChild(item);
             });
+        }
+
+        // Toggle image selection
+        function toggleImageSelection(element, index) {
+            element.classList.toggle('selected');
+
+            if (selectedImages.includes(index)) {
+                selectedImages = selectedImages.filter(i => i !== index);
+            } else {
+                selectedImages.push(index);
+            }
+        }
+
+        // Handle part selection click
+        document.getElementById('part-img').onclick = (e) => {
+            const rect = e.target.getBoundingClientRect();
+            // Get coordinates relative to the original image size if needed, 
+            // but for simplicity we might need to send scaled coordinates or server expects original.
+            // Since we are resizing simple assets, let's check how we handle it.
+            // For now, let's send x, y relative to the displayed image size.
+            // Wait, the backend logic places objects on a 300x300 canvas.
+            // Does the frontend confirm the display size? 
+            // CSS has max-width: 400px. 
+            // Better to send relative coordinates (0.0 - 1.0) OR scale them back to original size.
+            // Let's rely on the image natural size vs displayed size.
+
+            const scaleX = e.target.naturalWidth / e.target.width;
+            const scaleY = e.target.naturalHeight / e.target.height;
+
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+
+            partSelection = { x: x, y: y };
+
+            // Visual feedback
+            const container = document.getElementById('part-container');
+            // Remove old marker
+            const oldMarker = container.querySelector('.click-marker');
+            if (oldMarker) oldMarker.remove();
+
+            const marker = document.createElement('div');
+            marker.className = 'click-marker';
+            marker.style.left = (e.clientX - rect.left) + 'px';
+            marker.style.top = (e.clientY - rect.top) + 'px';
+            container.appendChild(marker);
         };
+
+        // Play audio
+        document.getElementById('play-audio').onclick = () => {
+            document.getElementById('audio-player').play();
+        };
+
+        // Verify button
+        document.getElementById('verify-btn').onclick = () => {
+            verifyAnswer();
+        };
+
+        // Enter key to submit
+        document.getElementById('text-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyAnswer();
+        });
+
+        document.getElementById('voice-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyAnswer();
+        });
+
+        // Verify answer
+        function verifyAnswer() {
+            let payload = {};
+
+            if (currentStage === 'text') {
+                payload.answer = document.getElementById('text-input').value;
+            } else if (currentStage === 'image') {
+                payload.selected = selectedImages;
+            } else if (currentStage === 'part') {
+                if (!partSelection) {
+                    showMessage('Please click on the object first', '#ffaa00');
+                    return;
+                }
+                payload.x = partSelection.x;
+                payload.y = partSelection.y;
+            } else if (currentStage === 'voice') {
+                payload.answer = document.getElementById('voice-input').value;
+            }
+
+            showMessage('Verifying... <span class="loading"></span>', '#00f2ff');
+
+            fetch('/verify_captcha', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.access_granted) {
+                        showGrantedScreen();
+                    } else if (data.access_denied) {
+                        showDeniedScreen();
+                    } else if (data.progress_stage || data.reload_challenge) {
+                        showMessage(data.message, data.success ? '#00ff88' : '#ff0055');
+                        setTimeout(() => {
+                            loadChallenge();
+                        }, 2000);
+                    } else if (data.expired) {
+                        showMessage(data.message, '#ffaa00');
+                        setTimeout(() => {
+                            loadChallenge();
+                        }, 2000);
+                    } else {
+                        showMessage(data.message, data.success ? '#00ff88' : '#ff0055');
+                    }
+                });
+        }
+
+        // Show message
+        function showMessage(text, color) {
+            const msg = document.getElementById('message');
+            msg.innerHTML = text;
+            msg.style.color = color;
+            msg.style.textShadow = `0 0 10px ${color}`;
+        }
+
+        // Show denied screen
+        function showDeniedScreen() {
+            document.getElementById('challenge-area').classList.add('hidden');
+            document.getElementById('denied-screen').classList.remove('hidden');
+
+        }
+
+        // Show granted screen
+        function showGrantedScreen() {
+            document.getElementById('challenge-area').classList.add('hidden');
+            document.getElementById('granted-screen').classList.remove('hidden');
+
+        }
     </script>
 </body>
+
 </html>
